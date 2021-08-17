@@ -1,0 +1,4 @@
+# requirements.txt
+flask-restful
+flask
+firebase_admin
