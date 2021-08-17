@@ -5,8 +5,8 @@ name = "pypi"
 
 [packages]
 flask-restful = "*"
-flask-sqlalchemy = "*"
 flask = "*"
+firebase-admin = "*"
 
 [dev-packages]
 
