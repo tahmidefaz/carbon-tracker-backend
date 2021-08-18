@@ -5,6 +5,7 @@ from firebase_admin import credentials, firestore, initialize_app
 from flask import request, jsonify
 
 from lib.data_prep import produce_db_data
+from lib.config import config
 
 
 
@@ -70,7 +71,6 @@ class Footprint(Resource):
                 activity_array = []
                 for activity in collection.stream():
                     activity_array.append(activity.to_dict())
-                    print(f'{activity.id} => {activity.to_dict()}')
 
                 response_data.append({collection.id: activity_array})
 

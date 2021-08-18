@@ -2,3 +2,4 @@
 flask-restful
 flask
 firebase_admin
+flask-cors
