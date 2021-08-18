@@ -1,8 +1,11 @@
+import uuid
+
 from flask_restful import Resource, reqparse
 from firebase_admin import credentials, firestore, initialize_app
 from flask import request, jsonify
 
-import uuid 
+from lib.data_prep import produce_db_data
+
 
 
 cred = credentials.Certificate('carbon-tracker-key.json')
@@ -23,21 +26,23 @@ class Activity(Resource):
         self.parser.add_argument('x-identity', location='headers', required=True, help="x-identity header was not provided")
         self.parser.add_argument(
             'name',
-            choices=('food','flight'),
+            choices=('car','electricity'),
             location='json', required=True, help='activity name was not provided'
             )
         self.parser.add_argument('date', type=str, location='json', required=True, help='date was not provided')
-        self.parser.add_argument('food_data', type=dict, location='json')
+        self.parser.add_argument('car_data', type=dict, location='json')
+        self.parser.add_argument('electricity_data', type=dict, location='json')
+        # self.parser.add_argument('food_data', type=dict, location='json')
 
     def post(self):
         try:
             args = self.parser.parse_args()
             account = args['x-identity']
 
-            field = {"name":args['name'], "info": (args['name']+' '+args["food_data"]["amount"]),"emission": 40}
+            activity_data = produce_db_data(args)
 
             document_id = uuid.uuid4().hex[:6].upper()
-            db_ref.document(account).collection(args['date']).document(document_id).set(field)
+            db_ref.document(account).collection(args['date']).document(document_id).set(activity_data)
 
             return {'message': 'success'}, 201
         except Exception as e:
