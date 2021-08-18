@@ -109,7 +109,7 @@ def produce_db_data(args):
         if not food_data:
             abort(400, description="food_data is missing")
         if "type" not in food_data or "weight" not in food_data:
-            abort(400, description="fields are missing in flight_data")
+            abort(400, description="fields are missing in food_data")
 
         return get_food_emissions(food_data)
     
