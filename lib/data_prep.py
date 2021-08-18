@@ -1,4 +1,9 @@
+import requests
+from requests.exceptions import HTTPError
+
 from flask import abort
+
+from lib.config import config
 
 def get_car_emissions(car_data):
     mpg_map = {"compact": 44.9741, "midrange": 35.10664, "heavy": 28.0351}
@@ -10,7 +15,7 @@ def get_car_emissions(car_data):
     emission = (fuel_co2/car_mpg)*int(car_data["distance"])
 
     data = {"name": "car"}
-    data["info"] = car_data["type"] + " " + car_data["fuel_type"] + " " + car_data["distance"]+"mi"
+    data["info"] = f"{car_data['type']} {car_data['fuel_type']} {car_data['distance']}mi"
     data["emission"] = round(emission,2)
 
     return data
@@ -20,11 +25,30 @@ def get_electricity_emissions(electricity_data):
     emission = int(electricity_data["kwh"]) * 0.4532
 
     data = {"name": "electricity"}
-    data["info"] = electricity_data["kwh"] + " kwh"
+    data["info"] = f"{electricity_data['kwh']} kwh"
     data["emission"] = round(emission,2)
 
     return data
 
+
+def fetch_flight_emission(flight_data):
+    params = {'segments[0][origin]':flight_data['origin'], 'segments[0][destination]':flight_data['destination'], 'cabin_class':flight_data['cabin_class'], 'currencies[]':'USD'}
+    
+    response = requests.get(config['goclimate_endpoint'], auth=(config['goclimate_key'],None), data=params)
+    response.raise_for_status()
+    response_json = response.json()
+
+    return response_json['footprint']
+
+
+def get_flight_emissions(flight_data):
+    emission = fetch_flight_emission(flight_data)
+
+    data = {"name": "flight"}
+    data["info"] = f"{flight_data['origin']} - {flight_data['destination']} {flight_data['cabin_class']} class"
+    data["emission"] = round(emission,2)
+
+    return data
 
 def produce_db_data(args):
     # {"name":args['name'], "info": (args['name']+' '+args["food_data"]["amount"]),"emission": 40}
@@ -39,7 +63,7 @@ def produce_db_data(args):
             abort(400, description="invalid fuel type")
 
         return get_car_emissions(car_data)
-    
+
     elif args['name'] == 'electricity':
         electricity_data = args.get('electricity_data')
 
@@ -49,4 +73,16 @@ def produce_db_data(args):
             abort(400, description="kwh in electricity_data is missing")
 
         return get_electricity_emissions(electricity_data)
+
+    elif args['name'] == 'flight':
+        flight_data = args.get('flight_data')
+
+        if not flight_data:
+            abort(400, description="flight_data is missing")
+        if "origin" not in flight_data or "destination" not in flight_data or "cabin_class" not in flight_data:
+            abort(400, description="fields are missing in flight_data")
+        if flight_data['cabin_class'] not in ['economy','premium_economy','business','first']:
+            abort(400, description="invalid cabin_class")
+        
+        return get_flight_emissions(flight_data)
     return

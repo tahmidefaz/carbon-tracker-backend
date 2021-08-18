@@ -27,12 +27,13 @@ class Activity(Resource):
         self.parser.add_argument('x-identity', location='headers', required=True, help="x-identity header was not provided")
         self.parser.add_argument(
             'name',
-            choices=('car','electricity'),
+            choices=('car','electricity','flight'),
             location='json', required=True, help='activity name was not provided'
             )
         self.parser.add_argument('date', type=str, location='json', required=True, help='date was not provided')
         self.parser.add_argument('car_data', type=dict, location='json')
         self.parser.add_argument('electricity_data', type=dict, location='json')
+        self.parser.add_argument('flight_data', type=dict, location='json')
         # self.parser.add_argument('food_data', type=dict, location='json')
 
     def post(self):
@@ -47,7 +48,7 @@ class Activity(Resource):
 
             return {'message': 'success'}, 201
         except Exception as e:
-            return {'message': f"An Error Occured: {e}"}, 400
+            return {'message': f"{e}"}, 400
 
 
 class Footprint(Resource):
@@ -77,4 +78,4 @@ class Footprint(Resource):
             response = {"page": page, "limit": limit, "total": 10, "data": response_data}
             return response
         except Exception as e:
-            return {'message': f"An Error Occured {e}"}, 400
+            return {'message': f"{e}"}, 400
