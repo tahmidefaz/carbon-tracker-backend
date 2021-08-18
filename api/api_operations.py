@@ -27,14 +27,14 @@ class Activity(Resource):
         self.parser.add_argument('x-identity', location='headers', required=True, help="x-identity header was not provided")
         self.parser.add_argument(
             'name',
-            choices=('car','electricity','flight'),
+            choices=('car','electricity','flight','food'),
             location='json', required=True, help='activity name was not provided'
             )
         self.parser.add_argument('date', type=str, location='json', required=True, help='date was not provided')
         self.parser.add_argument('car_data', type=dict, location='json')
         self.parser.add_argument('electricity_data', type=dict, location='json')
         self.parser.add_argument('flight_data', type=dict, location='json')
-        # self.parser.add_argument('food_data', type=dict, location='json')
+        self.parser.add_argument('food_data', type=dict, location='json')
 
     def post(self):
         try:

@@ -4,6 +4,11 @@ from requests.exceptions import HTTPError
 from flask import abort
 
 from lib.config import config
+from lib.food_emi_provider import load_food_emissions
+
+
+food_emmisions = load_food_emissions()
+
 
 def get_car_emissions(car_data):
     mpg_map = {"compact": 44.9741, "midrange": 35.10664, "heavy": 28.0351}
@@ -50,8 +55,19 @@ def get_flight_emissions(flight_data):
 
     return data
 
+
+def get_food_emissions(food_data):
+    emission_per_gram = float(food_emmisions[food_data['type']])
+    emission = (float(food_data['weight'])*28.3495*emission_per_gram)/1000
+
+    data = {"name": "food"}
+    data["info"] = f"{food_data['type']} {food_data['weight']} oz"
+    data["emission"] = round(emission,2)
+    print(data)
+    return data
+
+
 def produce_db_data(args):
-    # {"name":args['name'], "info": (args['name']+' '+args["food_data"]["amount"]),"emission": 40}
     if args['name'] == 'car':
         car_data = args.get('car_data')
 
@@ -85,4 +101,19 @@ def produce_db_data(args):
             abort(400, description="invalid cabin_class")
         
         return get_flight_emissions(flight_data)
+    
+
+    elif args['name'] == 'food':
+        food_data = args.get('food_data')
+
+        if not food_data:
+            abort(400, description="food_data is missing")
+        if "type" not in food_data or "weight" not in food_data:
+            abort(400, description="fields are missing in flight_data")
+
+        return get_food_emissions(food_data)
+    
+    else:
+        abort(400)
+
     return
