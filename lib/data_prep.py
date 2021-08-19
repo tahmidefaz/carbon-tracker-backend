@@ -58,10 +58,10 @@ def get_flight_emissions(flight_data):
 
 def get_food_emissions(food_data):
     emission_per_gram = float(food_emmisions[food_data['type']])
-    emission = (float(food_data['weight'])*28.3495*emission_per_gram)/1000
+    emission = (float(food_data['weight'])*emission_per_gram)/1000
 
     data = {"name": "food"}
-    data["info"] = f"{food_data['type']} {food_data['weight']} oz"
+    data["info"] = f"{food_data['type']} {food_data['weight']} g"
     data["emission"] = round(emission,2)
     print(data)
     return data
